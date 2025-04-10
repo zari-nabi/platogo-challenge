@@ -179,3 +179,46 @@ export function payTicket(
     paidAt,
   };
 }
+
+/**
+ * Returns the current exit eligibility of a ticket.
+ * - "paid"     → Ticket is paid and within 15-minute exit window
+ * - "expired"  → Paid, but exit window has expired
+ * - "unpaid"   → Not yet paid
+ * - "not_found"→ Ticket not found
+ *
+ * @param barcode - The 16-digit ticket barcode
+ * @returns A status string representing the ticket's state
+ */
+export function getTicketState(
+  barcode: string
+): "paid" | "unpaid" | "expired" | "not_found" {
+  const tickets = fetchTickets();
+  const ticket = tickets.find((t) => t.barcode === barcode);
+
+  if (!ticket) {
+    console.warn(`[getTicketState] Ticket not found for barcode: ${barcode}`);
+    return "not_found";
+  }
+
+  if (!ticket.payment) {
+    console.log(`[getTicketState] Ticket ${barcode} has not been paid.`);
+    return "unpaid";
+  }
+
+  const now = Date.now();
+  const gracePeriodMs = 15 * 60 * 1000;
+  const { paidAt } = ticket.payment;
+
+  if (now - paidAt > gracePeriodMs) {
+    console.log(
+      `[getTicketState] Ticket ${barcode} payment expired. Paid at: ${new Date(
+        paidAt
+      ).toLocaleString()}`
+    );
+    return "expired";
+  }
+
+  console.log(`[getTicketState] Ticket ${barcode} is valid for exit.`);
+  return "paid";
+}
