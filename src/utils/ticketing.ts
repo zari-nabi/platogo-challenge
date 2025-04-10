@@ -4,6 +4,10 @@
 type ParkingTicket = {
   barcode: string;
   issuedAt: number; // Unix timestamp in ms
+  payment?: {
+    method: string;
+    paidAt: number;
+  };
 };
 
 const TICKET_STORAGE_KEY = "parking_tickets";
@@ -107,5 +111,71 @@ export function calculatePrice(barcode: string): number {
     `Calculated fee for ticket ${barcode}: €${total} (${hoursParked} hour(s) parked)`
   );
 
+  if (ticket.payment) {
+    console.log(
+      `[calculatePrice] Ticket ${barcode} already paid at ${new Date(
+        ticket.payment.paidAt
+      ).toLocaleString()}`
+    );
+    return 0;
+  }
+
   return total;
+}
+
+/**
+ * Marks a ticket as paid by storing the payment method and timestamp.
+ * If already paid, returns the existing receipt.
+ *
+ * @param barcode - The 16-digit ticket barcode.
+ * @param method - Payment method used (e.g., 'credit card')
+ * @returns A receipt object or null if the ticket is not found.
+ */
+export function payTicket(
+  barcode: string,
+  method: string
+): { receipt: string; paidAt: number } | null {
+  const tickets = fetchTickets();
+  const index = tickets.findIndex((t) => t.barcode === barcode);
+
+  if (index === -1) {
+    console.warn(`[payTicket] No ticket found for barcode: ${barcode}`);
+    return null;
+  }
+
+  const ticket = tickets[index];
+
+  // Already paid
+  if (ticket.payment) {
+    const { method: existingMethod, paidAt } = ticket.payment;
+    console.log(
+      `[payTicket]  Ticket ${barcode} was already paid via ${existingMethod} on ${new Date(
+        paidAt
+      ).toLocaleString()}`
+    );
+    return {
+      receipt: `Receipt: Ticket ${barcode}, paid via ${existingMethod} on ${new Date(
+        paidAt
+      ).toLocaleString()}`,
+      paidAt,
+    };
+  }
+
+  const paidAt = Date.now();
+  ticket.payment = { method, paidAt };
+  tickets[index] = ticket;
+  storeTickets(tickets);
+
+  console.log(
+    `[payTicket] Payment recorded for ticket ${barcode} via ${method} at ${new Date(
+      paidAt
+    ).toLocaleString()}`
+  );
+
+  return {
+    receipt: `Receipt: Ticket ${barcode}, paid via ${method} on ${new Date(
+      paidAt
+    ).toLocaleString()}`,
+    paidAt,
+  };
 }
