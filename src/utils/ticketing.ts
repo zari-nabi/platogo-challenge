@@ -222,3 +222,20 @@ export function getTicketState(
   console.log(`[getTicketState] Ticket ${barcode} is valid for exit.`);
   return "paid";
 }
+
+/**
+ * Returns the number of currently available parking spaces.
+ * Considers all issued tickets as occupying one space.
+ *
+ * @returns A number from 0 to PARKING_CAPACITY
+ */
+export function getFreeSpaces(): number {
+  const tickets = fetchTickets();
+  const usedSpaces = tickets.length;
+  const freeSpaces = Math.max(0, PARKING_CAPACITY - usedSpaces);
+
+  console.log(
+    `[getFreeSpaces] ${freeSpaces} of ${PARKING_CAPACITY} spaces available.`
+  );
+  return freeSpaces;
+}

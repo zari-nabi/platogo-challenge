@@ -1,5 +1,6 @@
 import {
   calculatePrice,
+  getFreeSpaces,
   getTicket,
   getTicketState,
   payTicket,
@@ -9,3 +10,4 @@ import {
 (window as any).calculatePrice = calculatePrice;
 (window as any).payTicket = payTicket;
 (window as any).getTicketState = getTicketState;
+(window as any).getFreeSpaces = getFreeSpaces;
