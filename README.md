@@ -25,5 +25,12 @@ getTicketState("barcode");
 getFreeSpaces();
 ```
 
+## 🔁 Note for Reviewer
+
+The challenge implementation is located in the `feature` branch.
+Please review the Pull Request
+
+##
+
 Thanks for reviewing my work! Feel free to reach out with any questions during the review.
 Zahra Nabi
