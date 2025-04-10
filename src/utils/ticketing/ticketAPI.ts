@@ -1,51 +1,6 @@
-/**
- * A representation of a parking ticket.
- */
-type ParkingTicket = {
-  barcode: string;
-  issuedAt: number; // Unix timestamp in ms
-  payment?: {
-    method: string;
-    paidAt: number;
-  };
-};
-
-const TICKET_STORAGE_KEY = "parking_tickets";
-const PARKING_CAPACITY = 54;
-
-/**
- * Retrieves all stored parking tickets from localStorage.
- */
-export function fetchTickets(): ParkingTicket[] {
-  const stored = localStorage.getItem(TICKET_STORAGE_KEY);
-  return stored ? JSON.parse(stored) : [];
-}
-
-/**
- * Saves all parking tickets to localStorage.
- */
-export function storeTickets(tickets: ParkingTicket[]) {
-  localStorage.setItem(TICKET_STORAGE_KEY, JSON.stringify(tickets));
-}
-
-/**
- * Generates a 16-digit numeric barcode string.
- */
-function createBarcode(): string {
-  return Array.from({ length: 16 }, () => Math.floor(Math.random() * 10)).join(
-    ""
-  );
-}
-
-/**
- * Ensures a barcode is not duplicated.
- */
-function isBarcodeAvailable(
-  barcode: string,
-  tickets: ParkingTicket[]
-): boolean {
-  return !tickets.some((ticket) => ticket.barcode === barcode);
-}
+import { ParkingTicket } from "./types";
+import { fetchTickets, storeTickets } from "./storage";
+import { createBarcode, isBarcodeAvailable, PARKING_CAPACITY } from "./helpers";
 
 /**
  * Issues a new parking ticket and stores it.
