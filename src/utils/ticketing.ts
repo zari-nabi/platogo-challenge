@@ -78,3 +78,34 @@ export function getTicket(): ParkingTicket | null {
   console.log("Ticket issued:", newTicket);
   return newTicket;
 }
+
+/**
+ * Calculates the parking fee for a given ticket.
+ * Every started hour costs €2.
+ *
+ * @param barcode - The unique 16-digit barcode of the parking ticket.
+ * @returns The fee in euros. Returns 0 if ticket is not found.
+ */
+export function calculatePrice(barcode: string): number {
+  const tickets = fetchTickets();
+  const ticket = tickets.find((t) => t.barcode === barcode);
+
+  if (!ticket) {
+    console.warn(`Ticket not found for barcode: ${barcode}`);
+    return 0;
+  }
+
+  const now = Date.now();
+  const millisecondsInHour = 1000 * 60 * 60;
+  const durationMs = now - ticket.issuedAt;
+
+  const hoursParked = Math.ceil(durationMs / millisecondsInHour);
+  const ratePerHour = 2;
+  const total = hoursParked * ratePerHour;
+
+  console.log(
+    `Calculated fee for ticket ${barcode}: €${total} (${hoursParked} hour(s) parked)`
+  );
+
+  return total;
+}
